@@ -17,6 +17,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -124,7 +125,12 @@ export default function UserManagement() {
 
   const handleSave = () => {
     if (currentUser.id) {
-      updateMutation.mutate(currentUser);
+      // For updates, only include password if it's been changed
+      const updateData = { ...currentUser };
+      if (!updateData.password) {
+        delete updateData.password;
+      }
+      updateMutation.mutate(updateData);
     } else {
       createMutation.mutate(currentUser);
     }
@@ -180,6 +186,9 @@ export default function UserManagement() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{currentUser.id ? 'Edit User' : 'Create User'}</DialogTitle>
+            <DialogDescription>
+              {currentUser.id ? 'Manage user details and permissions.' : 'Create a new user account.'}
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -192,17 +201,18 @@ export default function UserManagement() {
                 disabled={!!currentUser.id}
               />
             </div>
-            {!currentUser.id && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="password" className="text-right">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  onChange={(e) => setCurrentUser({ ...currentUser, password: e.target.value })}
-                  className="col-span-3"
-                />
-              </div>
-            )}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="password" className="text-right">
+                {currentUser.id ? 'New Password' : 'Password'}
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder={currentUser.id ? 'Leave blank to keep current' : ''}
+                onChange={(e) => setCurrentUser({ ...currentUser, password: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="role" className="text-right">Role</Label>
               <Select
@@ -233,6 +243,9 @@ export default function UserManagement() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this user? This action cannot be undone.
+            </DialogDescription>
           </DialogHeader>
           <p>Are you sure you want to delete user {userToDelete?.email}?</p>
           <DialogFooter>

@@ -20,7 +20,10 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      localStorage.removeItem('user');
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     } else if (error.response?.status === 403) {
       // We will handle this in the UI or with a global toast if setup
       console.error('Permission denied (403)');

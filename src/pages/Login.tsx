@@ -47,12 +47,9 @@ export default function Login() {
       // Assuming response.data contains { access_token, user }
       // Adjust based on your actual API response structure
       const { access_token, user } = response.data;
+      console.log('Login response:', { access_token, user });
 
-      // If user is not returned, you might need to fetch it separately or decode the token
-      // For this example, we assume it's returned or we construct a basic one
-      const userData = user || { id: '1', email: data.email, role: 'USER' }; // Fallback
-
-      login(access_token, userData);
+      login(access_token, user);
       toast({
         title: 'Login successful',
         description: 'Welcome back!',
@@ -115,7 +112,7 @@ export default function Login() {
         </CardContent>
         <CardFooter className="justify-center">
           <p className="text-sm text-gray-500">
-            Demo: admin@example.com / password
+            Demo: rodrigo@moving.com / mudar@123
           </p>
         </CardFooter>
       </Card>

@@ -1,6 +1,7 @@
 import { render, screen, act } from '@testing-library/react';
 import { AuthProvider, useAuth } from '../AuthProvider';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Mock component to consume global AuthContext
 const TestComponent = () => {
@@ -18,16 +19,27 @@ const TestComponent = () => {
 };
 
 describe('AuthProvider', () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
   beforeEach(() => {
     localStorage.clear();
     vi.clearAllMocks();
+    queryClient.clear();
   });
 
   it('provides initial state (guest)', () => {
     render(
-      <AuthProvider>
-        <TestComponent />
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>
+      </QueryClientProvider>
     );
 
     expect(screen.getByTestId('auth-status')).toHaveTextContent('Guest');
@@ -36,9 +48,11 @@ describe('AuthProvider', () => {
 
   it('updates state on login', async () => {
     render(
-      <AuthProvider>
-        <TestComponent />
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>
+      </QueryClientProvider>
     );
 
     await act(async () => {
@@ -56,9 +70,11 @@ describe('AuthProvider', () => {
     localStorage.setItem('user', JSON.stringify({ id: '1', email: 'existing@example.com', role: 'USER' }));
 
     render(
-      <AuthProvider>
-        <TestComponent />
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>
+      </QueryClientProvider>
     );
 
     // Verify initial logged in state

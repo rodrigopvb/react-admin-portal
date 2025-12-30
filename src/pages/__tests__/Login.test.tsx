@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Login from '../Login';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { api } from '@/api/axios';
@@ -13,10 +14,19 @@ vi.mock('@/hooks/use-toast', () => ({
 
 // Wrap component with providers
 const renderWithProviders = (ui: React.ReactNode) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
   return render(
-    <BrowserRouter>
-      <AuthProvider>{ui}</AuthProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>{ui}</AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 };
 
