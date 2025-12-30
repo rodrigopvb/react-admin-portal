@@ -77,7 +77,10 @@ export default function UserManagement() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (userData: Partial<User>) => api.patch(`/users/${userData.id}`, userData),
+    mutationFn: (userData: Partial<User>) => {
+      const { id, ...payload } = userData;
+      return api.patch(`/users/${id}`, payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       toast({ title: 'User updated successfully' });
@@ -125,12 +128,16 @@ export default function UserManagement() {
 
   const handleSave = () => {
     if (currentUser.id) {
-      // For updates, only include password if it's been changed
-      const updateData = { ...currentUser };
-      if (!updateData.password) {
-        delete updateData.password;
+      // Clean update payload: only send what's allowed by UpdateUserDto
+      // and NOT in the body as 'id' is a Param, not a Body field
+      const { id, role, password } = currentUser;
+      const payload: any = { role };
+
+      if (password && password.trim() !== '') {
+        payload.password = password;
       }
-      updateMutation.mutate(updateData);
+
+      updateMutation.mutate({ id, ...payload } as User);
     } else {
       createMutation.mutate(currentUser);
     }
@@ -223,9 +230,11 @@ export default function UserManagement() {
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="USER">User</SelectItem>
                   <SelectItem value="ADMIN">Admin</SelectItem>
-                  <SelectItem value="TRIAL_EXPIRED">Trial Expired</SelectItem>
+                  <SelectItem value="MANAGER">Manager</SelectItem>
+                  <SelectItem value="VIEWER">Viewer</SelectItem>
+                  <SelectItem value="TRIAL">Trial</SelectItem>
+                  <SelectItem value="USER">User</SelectItem>
                 </SelectContent>
               </Select>
             </div>
